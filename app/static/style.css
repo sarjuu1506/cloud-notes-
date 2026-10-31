@@ -1,0 +1,70 @@
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  background: #f4f6f8;
+  color: #1f2933;
+}
+
+.container {
+  max-width: 640px;
+  margin: 2rem auto;
+  padding: 0 1rem;
+}
+
+h1 { margin-bottom: 1rem; }
+
+.note-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  background: #fff;
+  padding: 1rem;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  margin-bottom: 1.5rem;
+}
+
+input, textarea {
+  font: inherit;
+  padding: 0.5rem;
+  border: 1px solid #cbd2d9;
+  border-radius: 6px;
+}
+
+button {
+  font: inherit;
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 6px;
+  background: #2563eb;
+  color: #fff;
+  cursor: pointer;
+  align-self: flex-start;
+}
+
+button:hover { background: #1d4ed8; }
+
+.notes { list-style: none; padding: 0; margin: 0; }
+
+.note {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  background: #fff;
+  padding: 1rem;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  margin-bottom: 0.75rem;
+}
+
+.note h2 { font-size: 1.1rem; margin: 0 0 0.25rem; }
+.note p { margin: 0.25rem 0; white-space: pre-wrap; }
+.note small { color: #7b8794; }
+
+button.delete { background: #dc2626; }
+button.delete:hover { background: #b91c1c; }
+
+.error { color: #b91c1c; }
+.empty { color: #7b8794; }

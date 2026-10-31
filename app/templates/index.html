@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Cloud Notes</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <main class="container">
+    <h1>Cloud Notes</h1>
+
+    {% if error %}
+      <p class="error">{{ error }}</p>
+    {% endif %}
+
+    <form method="post" action="{{ url_for('create_note_form') }}" class="note-form">
+      <input type="text" name="title" placeholder="Title" maxlength="200" required>
+      <textarea name="body" placeholder="Write something..." rows="3"></textarea>
+      <button type="submit">Add note</button>
+    </form>
+
+    {% if notes %}
+      <ul class="notes">
+        {% for note in notes %}
+          <li class="note">
+            <div>
+              <h2>{{ note.title }}</h2>
+              {% if note.body %}<p>{{ note.body }}</p>{% endif %}
+              <small>{{ note.created_at }}</small>
+            </div>
+            <form method="post" action="{{ url_for('delete_note_form', note_id=note.id) }}">
+              <button type="submit" class="delete">Delete</button>
+            </form>
+          </li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      <p class="empty">No notes yet. Add your first one above.</p>
+    {% endif %}
+  </main>
+</body>
+</html>
