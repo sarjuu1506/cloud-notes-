@@ -52,3 +52,20 @@ def test_form_create_and_delete(client):
 
 def test_index_renders_empty_state(client):
     assert b"No notes yet" in client.get("/").data
+
+
+def test_proxy_headers(client):
+    resp = client.get("/health", headers={"X-Forwarded-Proto": "https", "X-Forwarded-For": "1.2.3.4"})
+    assert resp.status_code == 200
+
+
+def test_db_fallback_when_path_unwritable(monkeypatch):
+    from app import create_app
+    # If DATABASE_PATH is in a restricted path (like a root-owned /nonexistent/dir),
+    # create_app should not crash, it should gracefully fall back to a writable path
+    monkeypatch.setenv("DATABASE_PATH", "/restricted_root_dir_99999/notes.db")
+    fallback_app = create_app()
+    with fallback_app.test_client() as c:
+        resp = c.get("/health")
+        assert resp.status_code == 200
+

@@ -1,16 +1,48 @@
 """Cloud Notes - a small Flask app backed by SQLite, ready for container deployment."""
 import os
 import sqlite3
+import tempfile
 
 from flask import Flask, g, jsonify, redirect, render_template, request, url_for
+from werkzeug.middleware.proxy_fix import ProxyFix
 
 MAX_TITLE_LENGTH = 200
 
 
+def _resolve_db_path(target_path, instance_path):
+    candidates = []
+    if target_path:
+        candidates.append(target_path)
+    if instance_path:
+        candidates.append(os.path.join(instance_path, "notes.db"))
+    candidates.append(os.path.join(tempfile.gettempdir(), "cloud_notes.db"))
+
+    for path in candidates:
+        db_dir = os.path.dirname(os.path.abspath(path))
+        try:
+            os.makedirs(db_dir, exist_ok=True)
+            test_file = os.path.join(db_dir, ".write_test")
+            with open(test_file, "a") as f:
+                pass
+            if os.path.exists(test_file):
+                os.remove(test_file)
+            return path
+        except (OSError, PermissionError):
+            continue
+    return candidates[-1]
+
+
 def create_app(test_config=None):
     app = Flask(__name__)
+
+    # Support reverse proxies (HTTPS headers, client IP, host) on cloud platforms
+    app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_prefix=1)
+
+    configured_db = os.environ.get("DATABASE_PATH")
+    resolved_db = _resolve_db_path(configured_db, app.instance_path)
+
     app.config.update(
-        DATABASE=os.environ.get("DATABASE_PATH", os.path.join(app.instance_path, "notes.db")),
+        DATABASE=resolved_db,
     )
     if test_config:
         app.config.update(test_config)

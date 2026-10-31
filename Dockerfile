@@ -15,13 +15,14 @@ COPY wsgi.py .
 
 # Run as a non-root user
 RUN useradd --create-home appuser \
-    && mkdir -p /data \
-    && chown appuser:appuser /data
+    && mkdir -p /data /app/instance \
+    && chown -R appuser:appuser /data /app \
+    && chmod 777 /data
 USER appuser
 
-VOLUME ["/data"]
 EXPOSE 8000
 
-HEALTHCHECK --interval=30s --timeout=3s CMD python -c "import urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http://localhost:${PORT}/health').status == 200 else 1)"
+HEALTHCHECK --interval=30s --timeout=5s --start-period=5s --retries=3 \
+    CMD python -c "import os, urllib.request, sys; port = os.environ.get('PORT', '8000'); sys.exit(0 if urllib.request.urlopen(f'http://127.0.0.1:{port}/health').status == 200 else 1)"
 
-CMD ["sh", "-c", "gunicorn --bind 0.0.0.0:${PORT} --workers 2 wsgi:app"]
+CMD ["sh", "-c", "gunicorn --bind 0.0.0.0:${PORT} --workers 2 --threads 2 --access-logfile - --error-logfile - wsgi:app"]
